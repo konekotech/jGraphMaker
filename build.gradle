@@ -1,0 +1,82 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
+    id 'com.github.johnrengelman.shadow' version '8.+'
+    id 'org.gradlex.extra-java-module-info' version '1.0'
+    id 'org.beryx.jlink' version "3.0.1"
+}
+
+group = 'com.konekotech'
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+//version = '2.2.3-SNAPSHOT'
+sourceCompatibility = 21
+
+repositories {
+    mavenCentral()
+    maven { url "https://repository.aspose.com/java/repo/" }
+}
+
+application {
+    mainModule = 'com.konekotech.jGraphMaker'
+    mainClass.set('com.konekotech.jGraphMaker.Main')
+}
+
+extraJavaModuleInfo {
+    failOnMissingModuleInfo.set(false)
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    implementation 'com.aspose:aspose-cells:25.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+}
+
+javafx {
+    version = "21"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.swing' ]
+}
+
+
+jlink{
+    jpackage {
+        jvmArgs = ['-splash:splash.png']
+        installerOptions += [
+                '--name', 'jGraphMaker',
+                '--app-version', '0.0.1',
+                '--vendor', 'konekotech'
+        ]
+        if (org.gradle.internal.os.OperatingSystem.current().windows) {
+            installerType = 'msi'
+            // imageOptions += [
+            //         '--icon', 'src/main/resources/com/konekotech/jGraphMaker/img/icon.ico',
+            // ]
+            installerOptions += [
+                    '--win-menu-group', 'High Bridge',
+                    '--win-menu',
+                    '--win-dir-chooser'
+            ]
+        // }else if(org.gradle.internal.os.OperatingSystem.current().macOsX){
+        //     installerType = 'dmg'
+        //     imageOptions += ['--icon', 'src/main/resources/com/bstormuec/mm4win/img/icon.icns']
+        }
+    }
+}
+
+tasks.jpackageImage.doLast {
+    if (org.gradle.internal.os.OperatingSystem.current().windows) {
+        copy {
+            from "src/main/resources"
+            include "splash.png"
+            into "build/jpackage/$project.name/app"
+        }
+    }
+}
+
